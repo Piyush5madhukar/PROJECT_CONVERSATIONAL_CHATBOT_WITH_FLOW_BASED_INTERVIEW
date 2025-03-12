@@ -1,0 +1,46 @@
+[
+    {
+        "nodeId": "node1",
+        "rootNode": true,
+        "prompt": "Hello! Are you John?",
+        "edges": [
+            {
+                "condition": "user is John",
+                "targetNodeId": "node2"
+            },
+            {
+                "condition": "user is not John",
+                "targetNodeId": "node3"
+            }
+        ]
+    },
+    {
+        "nodeId": "node2",
+        "prompt": "Great to meet you, John. I 'm Monika, the AI agent here to conduct your Frontend Developer interview. Are you ready to begin the interview right now?",
+        "edges": [
+            {
+                "condition": "user is ready to start the interview",
+                "targetNodeId": "node4"
+            },
+            {
+                "condition": "user is not ready to start the interview",
+                "targetNodeId": "node5"
+            }
+        ]
+    },
+    {
+        "nodeId": "node3",
+        "prompt": "I apologize for the confusion. It seems I’ve reached the wrong candidate. Thank you for your time, and I’m sorry for any inconvenience. Have a great day!",
+        "edges": []
+    },
+    {
+        "nodeId": "node4",
+        "prompt": "Excellent! Let’s get started. First question: What is a closure in JavaScript?",
+        "edges": []
+    },
+    {
+        "nodeId": "node5",
+        "prompt": "I understand, no problem at all. I’m sorry for catching you at a busy time. Would you like me to end the call now, and we can reschedule for a more convenient time?",
+        "edges": []
+    }
+]

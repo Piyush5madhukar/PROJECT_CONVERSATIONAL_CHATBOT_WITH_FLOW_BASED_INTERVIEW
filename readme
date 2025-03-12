@@ -1,0 +1,169 @@
+Instructions to Run the Chatbot on local enviornment(machine)
+
+1) Setup Enviornment:
+==>python -m venv myenv
+
+2) Activate Enviornment :
+==>myenv/Scripts/activate
+
+3) Install Dependencies: 
+
+Ensure you have Python 3.8+ installed. Then, install the required dependencies:  
+
+=> pip install streamlit google-generativeai python-dotenv
+OR
+
+Run requirements.txt file
+
+==>pip install -r requirements.txt
+( requirements.txt must have all the libraries that need to be installed)
+
+4) Set Up API Keys :
+
+The chatbot requires LLM API keys (Gemini)
+Create a .env file in the same directory as the chatbot script and add:  
+
+==>GEMINI_API_KEY=your_google_gemini_key
+
+Replace your_google_gemini_key with the actual API key.
+
+
+5) Run the Chatbot:  
+
+To start the Streamlit chatbot, run:  
+
+streamlit run chatbot.py
+
+This will launch a web-based chatbot UI where you can interact with the LLM.
+
+--------------------------------------------------------------------------------
+ # Explanation of Design Choices:
+
+1️⃣ How Edge Conditions Are Evaluated Using LLM :
+
+The chatbot has a linear conversation tree, where the next action is determined by each user input.
+
+- Each question (node) has multiple edges (possible answers).
+- The chatbot uses an LLM to analyze user input and determine if the response logically satisfies the expected condition.
+- If so, it proceeds to the next node.
+- If not valid, it either asks the user again or terminates the dialogue.
+
+2️⃣ Code Implementation of Edge Evaluation:
+
+Function: validate_response()
+
+This function sends a prompt to the LLM (Gemini) to determine if the user response satisfies the condition.
+
+
+```python
+def validate_response(user_input, expected_condition):
+    """Uses LLM to check if user_input agrees with the expected condition"""
+    prompt = f"""
+    You are an AI assistant validating user input for a structured chatbot. 
+    User response: "{user_input}" 
+    Expected condition: "{expected_condition}"
+
+    Does the user's response logically align with the expected condition?
+    Reply with only 'yes' or 'no'.
+    """
+    try:
+        model = genai.GenerativeModel("gemini-2.0-flash")  
+        response = model.generate_content(prompt)
+        return response.text.strip().lower() == "yes"
+    except Exception as e:
+        st.error(f"LLM processing error: {e}")
+        return False
+```
+
+This style
+- Is user flexible with responses while holding a systematic sequence.
+- LLM compares logical consistency in place of verbatim word agreement.
+- Maintains multiple LLMs (Gemini, Claude, Mistral) on the basis of the API key.
+
+3️⃣ Edge Case Management :
+
+
+:User inputs unintended input (mistake, uncertainty) => LLM re-grants the answer and attempts once more.
+:User doesn't fit into any edge condition => Conversation concludes by displaying a message.
+:Bot should not repeat questions=> Guaranteed by verifying the chat history prior to adding messages.
+:User cannot type after conversation ends=> Chatbox is disabled after the bot announces: The conversation has ended. Thank you!
+
+1. LLM dynamically scores responses based on conditions in the conversation tree.
+2. Modular design facilitates switching between Gemini, Claude, and Mistral.
+3. Edge conditions avoid unintended loops and provide a structured conversation flow.
+4. Streamlit UI changes are handled to prevent flicker and repetition of messages.
+
+----------------------------------------------------------------------
+
+USER MUST OBEY TO THESE RULES TO USE THE CHATBOT PROPERLY:
+
+Example Scenarios 
+
+Scenario 1: User is John and Ready 
+
+1. Node: node1 
+
+○ Prompt: "Ask if the user is John" 
+○ AI Response: "Hello! Are you John?" 
+
+○ User Input: "Yes, I’m John." 
+○ Condition: "user is John" → Moves to node2 
+
+2. Node: node2 
+
+○ Prompt: "Introduce yourself & ask if we can conduct interview right now" 
+○ AI Response: "Great to meet you, John. I’m Monika, the AI agent here to 
+conduct your Frontend Developer interview. Are you ready to begin the 
+interview right now?" 
+
+○ User Input: "Yes, I’m ready." 
+○ Condition: "user is ready to start the interview" → Moves to node4 
+
+3. Node: node4 
+
+○ Prompt: "Start interview process by asking question 1: 'What are closure 
+in Javascript ?'" 
+○ AI Response: "Excellent! Let’s get started. First question: What is a 
+closure in JavaScript?" 
+
+
+Scenario 2: User is John but Not Ready
+
+1. Node: node1 [rootNode] 
+
+○ Prompt: "Ask if the user is John" 
+○ AI Response: "Hello! Are you John?" 
+
+○ User Input: "Yes, that’s me." 
+○ Condition: "user is John" → Moves to node2 
+
+2. Node: node2 
+○ Prompt: "Introduce yourself & ask if we can conduct interview right now" 
+○ AI Response: "Wonderful to meet you, John. I’m Monika, your AI 
+interviewer for the Frontend Developer role. Are you prepared to begin the 
+interview at this moment?" 
+
+○ User Input: "Actually, I’m not ready right now. I need some time." 
+○ Condition: "User is not ready to start the interview" → Moves to node5 
+
+3. Node: node5 
+○ Prompt: "Apologise to the user & ask if you can end the call" 
+○ AI Response: "I understand, no problem at all. I’m sorry for catching you at 
+a busy time. Would you like me to end the call now, and we can 
+reschedule for a more convenient time?" 
+
+
+Scenario 3: User is Not John 
+
+1. Node: node1 
+○ Prompt: "Ask if the user is John" 
+○ AI Response: "Hello! Are you John?" 
+○ User Input: "No, I’m not John." 
+○ Condition: "user is not John" → Moves to node3 
+
+2. Node: node3 
+○ Prompt: "Apologise to the user" 
+○ AI Response: "I apologize for the confusion. It seems I’ve reached the 
+wrong candidate. Thank you for your time, and I’m sorry for any 
+inconvenience. Have a great day!"
+
