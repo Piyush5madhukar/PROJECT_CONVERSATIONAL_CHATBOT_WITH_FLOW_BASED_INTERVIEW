@@ -32,7 +32,7 @@ Replace your_google_gemini_key with the actual API key.
 
 To start the Streamlit chatbot, run:  
 
-streamlit run chatbot.py
+streamlit run chatbot.py (NOTE : app2.py is the main file here)
 
 This will launch a web-based chatbot UI where you can interact with the LLM.
 
