@@ -93,6 +93,28 @@ This style
 3. Edge conditions avoid unintended loops and provide a structured conversation flow.
 4. Streamlit UI changes are handled to prevent flicker and repetition of messages.
 
+
+
+-Users may enter diverse responses (e.g., "Sure", "Yep")
+==>LLM interprets input rather than exact keyword matching
+==> validate_response(user_input, expected_condition, llm
+
+-Users may enter nonsense answers that should not continue
+==> LLM determines whether input is in accordance with the condition before the chatbot continues.
+==>classify_response(user_input, edges, llm)
+
+-LLM may hallucinate false responses
+==>Requires the LLM to answer either "yes" or "no".
+==>validate_prompt enforces structured responses.
+
+-Chatbot may answer the same question repeatedly
+==>Avoids duplicate messages by using chat history tracking.
+==>if not st.session_state.chat_history.
+
+Users may continue typing after conversation is over
+==> Prevents input after end node is reached.
+==>if not st.session_state.conversation_ended:
+
 ----------------------------------------------------------------------
 
 USER MUST OBEY TO THESE RULES TO USE THE CHATBOT PROPERLY:
